@@ -202,8 +202,6 @@ with Bot(teardown=False) as bot:
                 
                 df_default_dict.to_csv(f'{path}/customInput.csv')
         elif contact_list == 's' or contact_list == 'y':
-            pass
-            pass
             load_df = pd.read_csv(path)
             df = bot.check_contact_list(df=load_df,email=email,password=password)
             df.to_csv(path)
