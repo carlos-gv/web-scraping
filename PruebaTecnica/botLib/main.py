@@ -375,6 +375,19 @@ class Bot(webdriver.Chrome):
             return True
         else:
             return False
+        
+    def is_connection_pending(self, driver):
+        #Get the div of the "connection" buttons innerHTML
+        text = str( WebDriverWait(driver,5).until(
+            EC.element_to_be_clickable((
+                By.CSS_SELECTOR, 'main div.ph5.pb5 > div[class*="pv-top-card"] > div'
+            ))
+        ).get_attribute('innerHTML') )
+        value = 'Pending'
+        if value in text:
+            return True
+        else:
+            return False
 
     
     def verify_keyword_in_profile(self, driver, company_name=None, keyword=None):
@@ -418,3 +431,24 @@ class Bot(webdriver.Chrome):
         )
         connect_button.click()
         return {'Conect Request Sent' : False}
+
+    def check_contact_list(self,df,email,password):
+        self.land_first_page()
+        self.login(email=email,password=password)
+        for i in range(len(df)):
+            link = df.loc[i,'Linkedin Link']
+            self.get(link)
+            is_connection = self.is_profile_a_connection(driver=self)
+            is_connection_pending = self.is_connection_pending(driver=self)
+
+            if not is_connection and not is_connection_pending:
+                send_req = self.send_connect_req(driver=self)
+                df.loc[i,'Conect Request Sent'] = send_req['Conect Request Sent']
+                pass
+            elif not is_connection and is_connection_pending:
+                df.loc[i,'Conect Request Sent'] = True
+                df.loc[i,'Is Profile Not a Connection'] = True
+            else:
+                df.loc[i,'Conect Request Sent'] = True
+                df.loc[i,'Is Profile Not a Connection'] = False
+        return df
