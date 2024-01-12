@@ -86,8 +86,6 @@ if lang == 'es':
             campaign = input("Proporcione el número de la campaña a ser creada: ")
             search_value = input('Palabra clave para las empresas que está buscando: ')
             filter_location = input('Filtrar por país. (Si hay más de uno, sepárelos por coma): ').split(",")
-            print(filter_location)
-            print(type(filter_location))
             filter_industry = input('Filtrar por industria. (Si hay más de una, sepárelos por coma): ').split(",")
             save_input = input('¿Quiere guardar las siguientes instrucciones en un archivo para uso futuro? (Tenga la seguridad de que todo se almacenará solo en el archivo de salida y podrá borrarlos manualmente si lo desea.) \n [S]í/[N]o): ').lower()
             if save_input == 's':
