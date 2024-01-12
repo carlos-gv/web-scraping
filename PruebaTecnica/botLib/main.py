@@ -197,6 +197,7 @@ class Bot(webdriver.Chrome):
                 companies_list = root.find_elements(By.CSS_SELECTOR, 'li')
                 for company in companies_list:
                     dict_data_raw = self.open_company_profile(driver=self,company=company,keywords=keywords)
+                    print(f'Dict data raw\n{dict_data_raw}')
                     if dict_data_raw:
                         dict_data['Name'].extend(dict_data_raw['Name'])
                         dict_data['Company'].extend(dict_data_raw['Company'])
@@ -205,6 +206,8 @@ class Bot(webdriver.Chrome):
                         dict_data['Linkedin Link'].extend(dict_data_raw['Linkedin Link'])
                         dict_data['Is Profile Not a Connection'].extend(dict_data_raw['Is Profile Not a Connection'])
                         dict_data['Conect Request Sent'].extend(dict_data_raw['Conect Request Sent'])
+                        print('\nagregado al data base\n')
+                        print(dict_data)
                 
 
                 print(f'pagina numero: {_}')
@@ -271,11 +274,12 @@ class Bot(webdriver.Chrome):
                     counter = counter + 1
                     print(f'\nEntering a new card ({counter})\n')
                     #Skipping non profile cards
-                    try:
-                        dict_profile = self.check_profile(driver=driver, card=card, people_window=people_window, keyword=keyword, company_name=company_name)
-                    except:
-                        print('Error in cheking profile.. skipping this card')
-                        continue
+                    #try:
+                    dict_profile = self.check_profile(driver=driver, card=card, people_window=people_window, keyword=keyword, company_name=company_name)
+                    #except:
+                    #    print('Error in cheking profile.. skipping this card')
+                    #    continue
+                    print(dict_profile)
                     if dict_profile:
                         print(f'\n Beginnig to extract check_profile returned data')
                         dict_data['Company'].append(company_name)
@@ -292,6 +296,7 @@ class Bot(webdriver.Chrome):
                         print(f'\n sixth dict_data added name')
                         dict_data['Conect Request Sent'].append(dict_profile['Conect Request Sent'])
                         print(f'\n Ended to extract check_profile returned data')
+                        print(dict_data)
                     
                 driver.close()
                 #Close 2nd tab
@@ -318,7 +323,6 @@ class Bot(webdriver.Chrome):
                     print(f'No peoples window found. (exceptExceptStatement)')
                 print(f'\nAbout to switch to original window exceptStament)')
                 driver.switch_to.window(original_window)
-                return False
 
         
         return dict_data
@@ -337,30 +341,31 @@ class Bot(webdriver.Chrome):
         correct_profile = self.verify_keyword_in_profile(driver=driver,keyword=keyword,company_name=company_name)
         print(f'has the key words? --> {correct_profile}\n')
         profile_is_not_a_connection = not self.is_profile_a_connection(driver=driver)
-        if correct_profile and profile_is_not_a_connection:
-            dict_connect = {'Conect Request Sent': False}#self.send_connect_req(driver=driver)
-            pass
-        else:
+        #is_connection_pending = self.is_connection_pending(driver=driver)
+        if correct_profile :
+            dict_connect = self.send_connect_req(driver=driver)
+            contact_name = self.find_element(By.CSS_SELECTOR, 'h1[class*="text-heading"]')\
+                .get_attribute("innerText")
+            print(f'\n name of the contact: {contact_name}')
+
+            #Close 3rd window
+            time.sleep(2)
             print(f'about to close the 3rd window\n')
             driver.close()
             print(f'about to swich to the 2nd window\n')
             driver.switch_to.window(people_window)
             print(f'ending checing function\n')
+            return_data = {'Linkedin Link': str(card_link),'Name':contact_name, 'Is Profile Not a Connection': profile_is_not_a_connection}
+            return_data.update(dict_connect)
+            return return_data
+            
+        elif not correct_profile:
+            print(f'about to close the 3rd window\n')
+            driver.close()
+            print(f'about to swich to the 2nd window\n')
+            driver.switch_to.window(people_window)
+            print(f' checing function returning FALSE\n')
             return False
-        contact_name = self.find_element(By.CSS_SELECTOR, 'h1[class*="text-heading"]')\
-            .get_attribute("innerText")
-        print(f'\n name of the contact: {contact_name}')
-
-        #Close 3rd window
-        time.sleep(2)
-        print(f'about to close the 3rd window\n')
-        driver.close()
-        print(f'about to swich to the 2nd window\n')
-        driver.switch_to.window(people_window)
-        print(f'ending checing function\n')
-        return_data = {'Linkedin Link': str(card_link),'Name':contact_name, 'Is Profile Not a Connection': profile_is_not_a_connection}
-        return_data.update(dict_connect)
-        return return_data
 
 
     def is_profile_a_connection(self, driver):
@@ -396,7 +401,6 @@ class Bot(webdriver.Chrome):
                     By.CSS_SELECTOR, 'main > section div[id="experience"] ~ div > ul'))
             )
             experience_list = experience_list.find_elements(By.CSS_SELECTOR, 'li')
-            #print(f'\n experience list: {experience_list}')
             correct_profile = False
             text = ''
             for element in experience_list:
@@ -408,7 +412,6 @@ class Bot(webdriver.Chrome):
                 company_name = company_name.lower()
                 if company_name in searched_company_name:
                     text = text + str(element.get_attribute('innerText')).lower()
-                    #print(f'texto + texto: {text}')
                     break
             keyword = keyword.lower()
             if company_name and keyword in text:
@@ -416,11 +419,27 @@ class Bot(webdriver.Chrome):
             return correct_profile
     
     def send_connect_req(self, driver ):
-        connect_button = WebDriverWait(driver,5).until(
-                    EC.element_to_be_clickable((
-                        By.CSS_SELECTOR, 'div.pv-top-card-v2-ctas button[aria-label*="to connect"] > span'
-                    ))
-                )
+        try:
+            connect_button = WebDriverWait(driver,5).until(
+                        EC.element_to_be_clickable((
+                            By.CSS_SELECTOR, 'div.pv-top-card-v2-ctas button[aria-label*="to connect"] > span'
+                        ))
+                    )
+        except:
+            try:
+                more_button = connect_button = WebDriverWait(driver,5).until(
+                        EC.element_to_be_clickable((
+                            By.CSS_SELECTOR, 'div[class*="pv-top-card-v2"] button[aria-label*="More"] span'
+                        ))
+                    )
+                more_button.click()
+                connect_button = WebDriverWait(driver,5).until(
+                        EC.element_to_be_clickable((
+                            By.CSS_SELECTOR, 'div[class*="pv-top-card-v2-ctas"] div[class*="artdeco-dropdown"] ul div[aria-label*="connect"] span'
+                        ))
+                    )
+            except:
+                pass
         connect_button.click()
 
         #Send connect request without a note
@@ -429,7 +448,7 @@ class Bot(webdriver.Chrome):
                 By.CSS_SELECTOR, 'button[aria-label="Send now"]'
             ))
         )
-        connect_button.click()
+        #connect_button.click()
         return {'Conect Request Sent' : False}
 
     def check_contact_list(self,df,email,password):

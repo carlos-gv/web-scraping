@@ -131,6 +131,7 @@ else:
             campaign = input("Provide number to the campaign that is about to be created: ")
             default_dict['campaignnumber'] = [int(campaign)]
             path = os.getcwd()
+            save_input = None
                 
         elif instructions == 'n':
             print('Please provide email and password (For security, nothing will be stored):\n ')
