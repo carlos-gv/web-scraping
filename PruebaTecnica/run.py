@@ -67,12 +67,15 @@ if lang == 'es':
             default_dict['custom_filters_industry'] = ','.join(loaded_dict['custom_filters_industry']).split(',')
             try:
                 default_dict['email'] = loaded_dict['email']
+            except:
+                print('Por favor, proporcione correo electrónico (por seguridad, nada se almacenará):\n')
+                email = input('Correo: ').lower()
+                default_dict['email'] = [email]
+            try:
                 default_dict['password'] = loaded_dict['password']
             except:
-                print('Por favor, proporcione correo electrónico y contraseña (por seguridad, nada se almacenará):\n')
-                email = input('Correo: ').lower()
+                print('Por favor, proporcione contraseña (por seguridad, nada se almacenará):\n')
                 password = getpass.getpass()
-                default_dict['email'] = [email]
                 default_dict['password'] = [password]
 
             campaign = input("Proporcione el número de la campaña a ser creada: ")
@@ -119,12 +122,15 @@ else:
             default_dict['custom_filters_industry'] = ','.join(loaded_dict['custom_filters_industry']).split(',')
             try:
                 default_dict['email'] = loaded_dict['email']
+            except:
+                print('Please provide email (For security, nothing will be stored):\n')
+                email = input('Email: ').lower()
+                default_dict['email'] = [email]
+            try:
                 default_dict['password'] = loaded_dict['password']
             except:
-                print('Please provide email and password (For security, nothing will be stored):\n')
-                email = input('Email: ').lower()
+                print('Please provide password (For security, nothing will be stored):\n')
                 password = getpass.getpass()
-                default_dict['email'] = [email]
                 default_dict['password'] = [password]
 
             campaign = input("Provide number to the campaign that is about to be created: ")
