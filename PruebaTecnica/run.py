@@ -38,6 +38,7 @@ import pandas as pd
 import getpass
 import datetime
 import os
+import traceback
 
 default_dict = {'email':['NULL'], 'password':['NULL'], 'search_value':['Staffing'], 
                         'filter_num_location':[6], 'custom_filters_location':['Colombia'], 
@@ -209,6 +210,7 @@ with Bot(teardown=False) as bot:
             
     except Exception as e:
         print('error en el run')
+        print(traceback.format_exc())
         print(e)
         time.sleep(10000)
     #time.sleep(1000)

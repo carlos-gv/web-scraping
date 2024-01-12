@@ -45,7 +45,7 @@ class Bot(webdriver.Chrome):
         self.find_element(By.CSS_SELECTOR,'button[data-id="sign-in-form__submit-btn"]').click()
         
     def search(self, search_value):
-        search_bar = WebDriverWait(self,5).until(
+        search_bar = WebDriverWait(self,15).until(
             EC.element_to_be_clickable((
                 By.CSS_SELECTOR, 'div[id="global-nav-typeahead"] > input[aria-label="Search"]'
             ))
