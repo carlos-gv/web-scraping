@@ -40,7 +40,7 @@ import datetime
 import os
 import traceback
 
-default_dict = {'email':['NULL'], 'password':['NULL'], 'search_value':['Staffing'], 
+default_dict = {'email':['NULL'], 'password':[''], 'search_value':['Staffing'], 
                         'filter_num_location':[6], 'custom_filters_location':['Colombia'], 
                         'filter_num_industry':[6], 'custom_filters_industry':['Software'],
                          'keywords':['Founder'],
@@ -67,12 +67,16 @@ if lang == 'es':
             default_dict['custom_filters_industry'] = ','.join(loaded_dict['custom_filters_industry']).split(',')
             try:
                 default_dict['email'] = loaded_dict['email']
+                if loaded_dict['email'] == '' or pd.isna(loaded_dict['email']):
+                    raise Exception('No email present')
             except:
                 print('Por favor, proporcione correo electrónico (por seguridad, nada se almacenará):\n')
                 email = input('Correo: ').lower()
                 default_dict['email'] = [email]
             try:
                 default_dict['password'] = loaded_dict['password']
+                if loaded_dict['password'] == '' or pd.isna(loaded_dict['password']):
+                    raise Exception('No password present')
             except:
                 print('Por favor, proporcione contraseña (por seguridad, nada se almacenará):\n')
                 password = getpass.getpass()
@@ -122,12 +126,17 @@ else:
             default_dict['custom_filters_industry'] = ','.join(loaded_dict['custom_filters_industry']).split(',')
             try:
                 default_dict['email'] = loaded_dict['email']
+                if loaded_dict['email'] == '' or pd.isna(loaded_dict['email']):
+                    raise Exception('No email present')
             except:
                 print('Please provide email (For security, nothing will be stored):\n')
                 email = input('Email: ').lower()
                 default_dict['email'] = [email]
             try:
                 default_dict['password'] = loaded_dict['password']
+                if loaded_dict['password'] == '' or pd.isna(loaded_dict['password']):
+                    raise Exception('No password present')
+
             except:
                 print('Please provide password (For security, nothing will be stored):\n')
                 password = getpass.getpass()
@@ -199,6 +208,7 @@ with Bot(teardown=False) as bot:
                 del default_dict['campaignnumber']
                 default_dict['custom_filters_location'] = [','.join(default_dict['custom_filters_location'])]
                 default_dict['custom_filters_industry'] = [','.join(default_dict['custom_filters_industry'])]
+                default_dict['password'] = ''
                 print('about to create df_default_dict')
                 path = os.getcwd()
                 print(path)
@@ -211,11 +221,13 @@ with Bot(teardown=False) as bot:
             load_df = pd.read_csv(path)
             df = bot.check_contact_list(df=load_df,email=email,password=password)
             df.to_csv(path)
+        del(password)
             
     except Exception as e:
         print('error en el run')
         print(traceback.format_exc())
         print(e)
+        del(password)
         time.sleep(10000)
     #time.sleep(1000)
 
